@@ -96,3 +96,48 @@ Returns an executive summary for the dataset.
 | 415 | Unsupported file type |
 | 422 | Validation error (details array) |
 | 500 | Internal server error (masked) |
+
+## Real-time Streaming
+
+The streaming API ingests continuous record batches and maintains rolling
+metrics (counts, throughput, per-field averages/min/max, null counts) that are
+pushed to subscribers in real time. It runs on an in-memory backend by default
+and transparently switches to Redis Streams when `REDIS_URL` is set.
+
+All endpoints are prefixed with `/api/v1/streaming`.
+
+### POST `/streaming/{stream_id}/ingest`
+
+Push a batch of records over HTTP. Requires a bearer token.
+
+```json
+{
+  "stream_id": "orders",
+  "records": [{ "amount": 120, "region": "EU" }, { "amount": 80 }]
+}
+```
+
+Response:
+
+```json
+{ "stream_id": "orders", "accepted": 2, "record_count": 2, "records_per_second": 1.87 }
+```
+
+### WS `/streaming/{stream_id}/ws`
+
+Bidirectional WebSocket. Send `{ "records": [ ... ] }` frames; the server
+replies with `{ "type": "metrics", "data": { ... } }` after each batch.
+
+### GET `/streaming/{stream_id}/events`
+
+Server-Sent Events stream of live metrics for dashboards. Because `EventSource`
+cannot send headers, pass the JWT as a `token` query parameter. Emits
+`data: { "type": "metrics", "data": { ... } }` frames plus periodic keep-alives.
+
+### GET `/streaming` and GET `/streaming/{stream_id}`
+
+List summaries for all active streams, or fetch a single stream's snapshot.
+
+### POST `/streaming/{stream_id}/persist`
+
+Flush buffered records so they can be analysed as a regular dataset.
