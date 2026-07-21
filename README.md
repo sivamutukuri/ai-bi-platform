@@ -13,6 +13,7 @@
 ## Features
 
 - **Multi-source ingestion** - CSV, Excel (`.xlsx`/`.xls`), JSON, and read-only SQL queries.
+- **Real-time streaming ingestion** - push record batches over HTTP, WebSocket, or Redis Streams; live rolling metrics streamed to the dashboard via Server-Sent Events.
 - **Automatic data cleaning** - column normalisation, type coercion, de-duplication, empty row/column removal, and median/mode imputation.
 - **Data quality report** - completeness, uniqueness, and validity scoring (0-100) with actionable issues.
 - **Missing-value & outlier detection** - per-column missingness and IQR-based outlier counts.
